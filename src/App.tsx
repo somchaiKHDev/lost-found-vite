@@ -28,7 +28,7 @@ export default function App() {
   })
   const [formCollapsed, setFormCollapsed] = useState<boolean>(() => localStorage.getItem(COLLAPSE_KEY) === '1')
   const [detailId, setDetailId] = useState<string | null>(null)
-  const [previewAnn, setPreviewAnn] = useState<Announcement | null>(null)
+  const [, setPreviewAnn] = useState<Announcement | null>(null)
 
   useEffect(() => { saveItems(items) }, [items])
   useEffect(() => { saveAnns(anns) }, [anns])

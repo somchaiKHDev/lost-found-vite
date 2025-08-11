@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Item, Announcement } from '../types'
 import { loadItems, loadAnns, todayISO } from '../utils'
@@ -38,14 +38,14 @@ function downloadText(filename: string, text: string, mime = 'text/plain;charset
   URL.revokeObjectURL(url)
 }
 
-function csvEscape(v: any){
+function csvEscape(v: unknown){
   if (v === null || v === undefined) return ''
   const s = String(v)
   if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"'
   return s
 }
 
-function objectsToCSV(rows: Record<string, any>[]): string{
+function objectsToCSV(rows: Record<string, unknown>[]): string{
   if (!rows.length) return ''
   const headers = Object.keys(rows[0])
   const lines = [headers.join(',')]
