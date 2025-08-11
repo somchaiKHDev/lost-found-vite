@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+/* App base styles */
+html, body, #root { height: 100%; }
+body { @apply bg-slate-50; }
+.no-print { @apply print:hidden; }
+@media print {
+  .no-print { display: none !important; }
+}
