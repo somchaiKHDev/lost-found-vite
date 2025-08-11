@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Item, Status } from '../../types'
 import { Field } from '../ui/Field'
 import { Input } from '../ui/Input'
