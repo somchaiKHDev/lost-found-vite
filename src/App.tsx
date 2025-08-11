@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import type { Announcement, Item } from './types'
 import { saveItems, loadItems, saveAnns, loadAnns, TAB_KEY, COLLAPSE_KEY, todayISO } from './utils'
@@ -11,6 +10,8 @@ import { FinderHandoverForm } from './components/forms/FinderHandoverForm'
 import { AnnouncementTab } from './components/announcements/AnnouncementTab'
 import { ListAndFilters } from './components/ListAndFilters'
 import { DetailsDrawer } from './components/DetailsDrawer'
+import EditItemModal from './components/forms/EditItemModal'
+import { Link } from 'react-router-dom'
 
 export default function App() {
   const [unlocked, setUnlocked] = useState(false)
@@ -29,6 +30,7 @@ export default function App() {
   const [formCollapsed, setFormCollapsed] = useState<boolean>(() => localStorage.getItem(COLLAPSE_KEY) === '1')
   const [detailId, setDetailId] = useState<string | null>(null)
   const [, setPreviewAnn] = useState<Announcement | null>(null)
+  const [editingItem, setEditingItem] = useState<Item | null>(null)
 
   useEffect(() => { saveItems(items) }, [items])
   useEffect(() => { saveAnns(anns) }, [anns])
@@ -52,8 +54,10 @@ export default function App() {
   const claimItem = (id: string, who: string) => setItems((prev) => prev.map((it) => it.id === id ? { ...it, status: "CLAIMED", claimer: who, dateClaimed: todayISO() } : it))
   const deleteItem = (id: string) => setItems((prev) => prev.filter((it) => it.id !== id))
   const storeItem = (id: string, shelf: string, storedBy: string) => setItems((prev) => prev.map((it) => it.id === id ? { ...it, status: "STORED", shelfCode: shelf, dateStored: todayISO(), storedBy } : it))
+  const updateItem = (updated: Item) => setItems(prev => prev.map(it => it.id === updated.id ? updated : it))
   const addAnn = (a: Announcement) => setAnns(prev => [a, ...prev])
   const deleteAnn = (id: string) => setAnns(prev => prev.filter(x => x.id !== id))
+  const updateAnn = (id: string, patch: Partial<Announcement>) => setAnns(prev => prev.map(a => a.id === id ? { ...a, ...patch } : a))
 
   const annCounts = useMemo(() => {
     const m: Record<string, number> = {}; anns.forEach(a => { if (a.itemId) m[a.itemId] = (m[a.itemId] || 0) + 1 })
@@ -115,16 +119,15 @@ export default function App() {
             ) : formTab === 'handover' ? (
               <FinderHandoverForm onAdd={addItem} staffName={staffName || "staff"} />
             ) : (
-              <AnnouncementTab items={items} anns={anns} onCreate={addAnn} onDelete={deleteAnn} staffName={staffName || "staff"} />
+              <AnnouncementTab items={items} anns={anns} onCreate={addAnn} onDelete={deleteAnn} onUpdate={updateAnn} staffName={staffName || "staff"} />
             ))}
 
             <ListAndFilters items={items} onClaim={claimItem} onDelete={deleteItem} onStore={storeItem}
               staffName={staffName || "staff"} onOpenDetails={(id) => setDetailId(id)}
-              onOpenAnnPreview={(id) => { const a = annLatestByItem[id]; if (a) setPreviewAnn(a); }} annCounts={annCounts} />
+              onOpenAnnPreview={(id) => { const a = annLatestByItem[id]; if (a) setPreviewAnn(a); }} annCounts={annCounts} onEditRequest={(item) => setEditingItem(item)} />
 
-            {detailId && (<DetailsDrawer item={items.find(i => i.id === detailId)!} onClose={() => setDetailId(null)} />)}
-            {/* announcement modal from latest preview trigger */}
-            {/* We reuse AnnouncementPreview inside AnnouncementTab, so we only show it from that component */}
+            {detailId && (<DetailsDrawer item={items.find(i => i.id === detailId)!} onClose={() => setDetailId(null)} onEditRequest={(it) => { setEditingItem(it); }} />)}
+            {editingItem && (<EditItemModal item={editingItem} onClose={() => setEditingItem(null)} onSave={(updated) => { updateItem(updated); setEditingItem(null); }} />)}
           </>
         )}
       </main>

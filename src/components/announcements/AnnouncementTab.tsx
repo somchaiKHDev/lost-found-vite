@@ -7,14 +7,15 @@ import { Field } from '../ui/Field'
 import { Button } from '../ui/Button'
 import { AnnouncementPreview } from './AnnouncementPreview'
 
-export const AnnouncementTab: React.FC<{ items: Item[]; anns: Announcement[]; onCreate: (a: Announcement) => void; onDelete: (id: string) => void; staffName: string; }>
-  = ({ items, anns, onCreate, onDelete, staffName }) => {
+export const AnnouncementTab: React.FC<{ items: Item[]; anns: Announcement[]; onCreate: (a: Announcement) => void; onDelete: (id: string) => void; onUpdate: (id: string, patch: Partial<Announcement>) => void; staffName: string; }>
+  = ({ items, anns, onCreate, onDelete, onUpdate, staffName }) => {
   const [mode, setMode] = useState<'editor' | 'board'>('editor')
   const [title, setTitle] = useState("")
   const [body, setBody] = useState("")
   const [linkedId, setLinkedId] = useState<string>("")
   const [q, setQ] = useState("")
   const [previewAnn, setPreviewAnn] = useState<Announcement | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   const canPost = title.trim() && body.trim()
 
@@ -30,8 +31,13 @@ export const AnnouncementTab: React.FC<{ items: Item[]; anns: Announcement[]; on
 
   const post = () => {
     if (!canPost) return
-    const ann: Announcement = { id: uid(), title: title.trim(), body: body.trim(), itemId: linkedId || undefined, createdAt: new Date().toISOString(), createdBy: staffName || 'staff' }
-    onCreate(ann); setTitle(""); setBody(""); setLinkedId(""); setMode('board')
+    if (editingId){
+      onUpdate(editingId, { title: title.trim(), body: body.trim(), itemId: linkedId || undefined })
+    } else {
+      const ann: Announcement = { id: uid(), title: title.trim(), body: body.trim(), itemId: linkedId || undefined, createdAt: new Date().toISOString(), createdBy: staffName || 'staff' }
+      onCreate(ann)
+    }
+    setTitle(""); setBody(""); setLinkedId(""); setEditingId(null); setMode('board')
   }
 
   const filtered = anns.filter(a => (q.trim() ? `${a.title} ${a.body}`.toLowerCase().includes(q.toLowerCase()) : true))
@@ -61,9 +67,9 @@ export const AnnouncementTab: React.FC<{ items: Item[]; anns: Announcement[]; on
           <Field label="หัวข้อประกาศ" required><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="เช่น ประกาศตามหาเจ้าของ: กระเป๋าสตางค์" /></Field>
           <Field label="เนื้อหาประกาศ" required><Textarea rows={5} value={body} onChange={(e) => setBody(e.target.value)} placeholder="พิมพ์รายละเอียดสำหรับใบประกาศ" /></Field>
           <div className="flex items-center justify-end gap-2">
-            <Button variant="ghost" onClick={() => { setTitle(""); setBody(""); setLinkedId(""); }}>ล้าง</Button>
-            <Button variant="ghost" onClick={() => setPreviewAnn({ id: uid(), title: title.trim() || "(ตัวอย่างประกาศ)", body: body.trim() || "ข้อความตัวอย่าง", createdAt: new Date().toISOString(), createdBy: staffName || 'staff', itemId: linkedId || undefined })} disabled={!canPost}>พรีวิว</Button>
-            <Button onClick={post} disabled={!canPost}>บันทึกประกาศ</Button>
+            <Button variant="ghost" onClick={() => { setTitle(""); setBody(""); setLinkedId(""); setEditingId(null); }}>ล้าง</Button>
+            <Button variant="ghost" onClick={() => setPreviewAnn({ id: 'preview', title: title.trim() || "(ตัวอย่างประกาศ)", body: body.trim() || "ข้อความตัวอย่าง", createdAt: new Date().toISOString(), createdBy: staffName || 'staff', itemId: linkedId || undefined })} disabled={!canPost}>พรีวิว</Button>
+            <Button onClick={post} disabled={!canPost}>{editingId ? 'บันทึกการแก้ไข' : 'บันทึกประกาศ'}</Button>
           </div>
           {anns.length > 0 && (
             <div className="mt-4">
@@ -77,6 +83,7 @@ export const AnnouncementTab: React.FC<{ items: Item[]; anns: Announcement[]; on
                     </div>
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" onClick={() => setPreviewAnn(a)}>ดู/พิมพ์</Button>
+                      <Button variant="ghost" onClick={() => { setMode('editor'); setEditingId(a.id); setTitle(a.title); setBody(a.body); setLinkedId(a.itemId || ''); }}>แก้ไข</Button>
                       <Button variant="danger" onClick={() => onDelete(a.id)}>ลบ</Button>
                     </div>
                   </div>
@@ -97,7 +104,10 @@ export const AnnouncementTab: React.FC<{ items: Item[]; anns: Announcement[]; on
                   <div className="mt-1 line-clamp-3 text-sm text-slate-700">{a.body}</div>
                   <div className="mt-2 flex items-center justify-between text-xs text-slate-500">
                     <span>{new Date(a.createdAt).toLocaleString()}</span>
-                    <Button variant="ghost" onClick={() => setPreviewAnn(a)}>อ่าน/พิมพ์</Button>
+                    <div className="inline-flex gap-2">
+                      <Button variant="ghost" onClick={() => setPreviewAnn(a)}>อ่าน/พิมพ์</Button>
+                      <Button variant="ghost" onClick={() => { setMode('editor'); setEditingId(a.id); setTitle(a.title); setBody(a.body); setLinkedId(a.itemId || ''); }}>แก้ไข</Button>
+                    </div>
                   </div>
                 </div>
               ))}

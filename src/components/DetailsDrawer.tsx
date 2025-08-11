@@ -3,7 +3,7 @@ import type { Item } from '../types'
 import { Button } from './ui/Button'
 import { Badge } from './ui/Badge'
 
-export const DetailsDrawer: React.FC<{ item: Item; onClose: () => void }> = ({ item, onClose }) => {
+export const DetailsDrawer: React.FC<{ item: Item; onClose: () => void; onEditRequest?: (item: Item) => void }> = ({ item, onClose, onEditRequest }) => {
   useEffect(() => {
     const root = document.documentElement; const body = document.body
     const prevOverflowRoot = root.style.overflow; const prevOverflowBody = body.style.overflow; const prevPaddingRight = body.style.paddingRight
@@ -28,7 +28,10 @@ export const DetailsDrawer: React.FC<{ item: Item; onClose: () => void }> = ({ i
               {item.status === 'CLAIMED' && <Badge tone="success">CLAIMED</Badge>}
             </div>
           </div>
-          <Button variant="ghost" onClick={onClose}>ปิด</Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={() => onEditRequest && onEditRequest(item)}>แก้ไข</Button>
+            <Button variant="ghost" onClick={onClose}>ปิด</Button>
+          </div>
         </div>
         <div className="overflow-y-auto p-4 grid gap-3">
           {item.imageUrl && (<img src={item.imageUrl} alt={item.title} className="w-full rounded-2xl object-cover" />)}

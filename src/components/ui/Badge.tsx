@@ -1,5 +1,4 @@
 import React from 'react'
-
 export const Badge: React.FC<{ children: React.ReactNode; tone?: "neutral" | "success" | "warning" | "info" }>
   = ({ children, tone = "neutral" }) => (
   <span className={[

@@ -5,8 +5,8 @@ import { Field } from './ui/Field'
 import { Input } from './ui/Input'
 import { Badge } from './ui/Badge'
 
-export const ItemCard: React.FC<{ item: Item; onClaim: (id: string, claimer: string) => void; onDelete: (id: string) => void; onStore: (id: string, shelf: string, storedBy: string) => void; staffName: string; onOpenDetails: (id: string) => void; onOpenAnnPreview: (id: string) => void; annCount?: number; }>
-  = ({ item, onClaim, onDelete, onStore, staffName, onOpenDetails, onOpenAnnPreview, annCount = 0 }) => {
+export const ItemCard: React.FC<{ item: Item; onClaim: (id: string, claimer: string) => void; onDelete: (id: string) => void; onStore: (id: string, shelf: string, storedBy: string) => void; staffName: string; onOpenDetails: (id: string) => void; onOpenAnnPreview: (id: string) => void; onEditRequest: (item: Item) => void; annCount?: number; }>
+  = ({ item, onClaim, onDelete, onStore, staffName, onOpenDetails, onOpenAnnPreview, onEditRequest, annCount = 0 }) => {
   const [who, setWho] = useState("")
   const [shelf, setShelf] = useState(item.shelfCode || "")
 
@@ -35,6 +35,7 @@ export const ItemCard: React.FC<{ item: Item; onClaim: (id: string, claimer: str
         </div>
         <div className="flex items-center gap-2">
           <Button variant="ghost" onClick={() => onOpenDetails(item.id)}>ดูรายละเอียด</Button>
+          <Button variant="ghost" onClick={() => onEditRequest(item)}>แก้ไข</Button>
           <Button variant="danger" onClick={() => onDelete(item.id)}>ลบ</Button>
         </div>
       </div>

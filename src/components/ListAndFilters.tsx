@@ -12,7 +12,8 @@ export const ListAndFilters: React.FC<{
   onOpenDetails: (id: string) => void;
   onOpenAnnPreview: (id: string) => void;
   annCounts: Record<string, number>;
-}> = ({ items, onClaim, onDelete, onStore, staffName, onOpenDetails, onOpenAnnPreview, annCounts }) => {
+  onEditRequest: (item: Item) => void;
+}> = ({ items, onClaim, onDelete, onStore, staffName, onOpenDetails, onOpenAnnPreview, annCounts, onEditRequest }) => {
   const [q, setQ] = useState("")
   const [status, setStatus] = useState<"ALL" | Status>("ALL")
   const [category, setCategory] = useState<string>("ALL")
@@ -58,7 +59,7 @@ export const ListAndFilters: React.FC<{
           <div className="rounded-3xl border border-dashed border-slate-300 p-8 text-center text-slate-600">ไม่มีข้อมูลที่ตรงกับการค้นหา/ตัวกรอง</div>
         ) : (
           filtered.map((it) => (
-            <ItemCard key={it.id} item={it} onClaim={onClaim} onDelete={onDelete} onStore={onStore} staffName={staffName} onOpenDetails={onOpenDetails} onOpenAnnPreview={onOpenAnnPreview} annCount={annCounts[it.id] || 0} />
+            <ItemCard key={it.id} item={it} onClaim={onClaim} onDelete={onDelete} onStore={onStore} staffName={staffName} onOpenDetails={onOpenDetails} onOpenAnnPreview={onOpenAnnPreview} onEditRequest={onEditRequest} annCount={annCounts[it.id] || 0} />
           ))
         )}
       </div>
